@@ -54,6 +54,7 @@ def generate_sensor_data(wear_level=0.0, previous_data=None):
 
 def stream():
     # Fetch API_URL here to ensure we get the updated env var from render_app.py
+    # Ensure we use the lowercase variable 'api_url' in the loop below
     api_url = os.getenv("API_URL", "http://127.0.0.1:8000/predict")
     print(f"🔄 Live sensor stream started targeting: {api_url}\n")
     # Simulation state
