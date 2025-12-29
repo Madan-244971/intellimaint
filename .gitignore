@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
-dashboard/prediction_logs.csv
 .env
 venv/
-.vscode/
+.env.local
+logs/
+*.log
