@@ -35,8 +35,14 @@ git branch -M main
 git remote remove origin >nul 2>&1
 git remote add origin %repo_url%
 
+echo.
+echo Remote URL set to: %repo_url%
+echo.
+
 echo 5. Pushing code...
-git push -u origin main
+echo.
+echo NOTE: When asked for a password, you MUST use a GitHub Personal Access Token (PAT).
+git -c credential.helper= push -u origin main
 
 echo.
 echo ==========================================
