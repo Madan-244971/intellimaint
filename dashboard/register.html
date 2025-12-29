@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>IntelliMaint - Register</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body style="display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);">
+
+<div class="panel" style="width: 400px; text-align: center; padding: 40px;">
+  <h1 style="margin-bottom: 20px; color: #00e5ff;">🛠 IntelliMaint</h1>
+  <h2 style="margin-bottom: 30px; font-size: 1.2em; color: #cfeefb;">Create Account</h2>
+
+  <form id="registerForm">
+    <div style="margin-bottom: 15px; text-align: left;">
+      <label style="color: #88ccff;">Username</label>
+      <input type="text" id="username" required style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid #444; color: white; border-radius: 6px;">
+    </div>
+
+    <div style="margin-bottom: 15px; text-align: left;">
+      <label style="color: #88ccff;">Role</label>
+      <select id="role" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid #444; color: white; border-radius: 6px;">
+        <option value="Employee">Employee</option>
+        <option value="Admin">Admin</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom: 25px; text-align: left;">
+      <label style="color: #88ccff;">Password</label>
+      <input type="password" id="password" required style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid #444; color: white; border-radius: 6px;">
+    </div>
+
+    <button type="submit" class="secondary" style="font-size: 1.1em;">Register</button>
+  </form>
+
+  <p style="margin-top: 20px; font-size: 0.9em; color: #cfeefb;">
+    Already have an account? <a href="login.html" style="color: #00e5ff; text-decoration: none; font-weight: bold;">Login here</a>
+  </p>
+  
+  <div id="msg" style="margin-top: 15px; display: none;"></div>
+</div>
+
+<script>
+  // Theme Logic
+  const style = document.createElement('style');
+  style.innerHTML = `
+    body.light-mode { background: #f0f2f5 !important; color: #333 !important; }
+    body.light-mode .panel { background: #fff !important; border: 1px solid #ccc !important; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    body.light-mode h1, body.light-mode h2 { color: #111 !important; }
+    body.light-mode label { color: #555 !important; }
+    body.light-mode input, body.light-mode select { background: #fff !important; color: #333 !important; border: 1px solid #ccc !important; }
+  `;
+  document.head.appendChild(style);
+  if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+
+  document.getElementById('registerForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const userIn = document.getElementById('username').value;
+    const passIn = document.getElementById('password').value;
+    const roleIn = document.getElementById('role').value;
+    const msg = document.getElementById('msg');
+
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+
+    if (users.find(u => u.username === userIn)) {
+      msg.innerText = "Username already exists!";
+      msg.style.color = "#ff4757";
+      msg.style.display = 'block';
+      return;
+    }
+
+    users.push({ username: userIn, password: passIn, role: roleIn });
+    localStorage.setItem('users', JSON.stringify(users));
+
+    msg.innerText = "Account created! Redirecting...";
+    msg.style.color = "#4ade80";
+    msg.style.display = 'block';
+    
+    setTimeout(() => {
+      window.location.href = 'login.html';
+    }, 1500);
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>IntelliMaint - Reports</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .report-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+    }
+    .machine-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>🛠 IntelliMaint Reports</h1>
+  <nav style="margin-top: 10px; display: flex; align-items: center;">
+    <a href="index.html" style="color: #cfeefb; margin: 0 15px; text-decoration: none;">Monitor</a>
+    <a href="reports.html" style="color: #fff; margin: 0 15px; text-decoration: none; font-weight: bold; border-bottom: 2px solid #ff6b6b;">Reports</a>
+    <a href="settings.html" style="color: #cfeefb; margin: 0 15px; text-decoration: none;">Settings</a>
+    <span id="userDisplay" style="margin-left: 20px; color: #00e5ff; font-size: 0.9em; text-transform: capitalize;"></span>
+    <a href="#" onclick="logout()" style="color: #ff6b6b; margin-left: 15px; text-decoration: none; font-size: 0.9em; border: 1px solid #ff6b6b; padding: 4px 10px; border-radius: 4px;">Logout</a>
+  </nav>
+</header>
+
+<div class="container">
+  <div class="panel" style="width: 100%;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2>Maintenance Logs</h2>
+      <div>
+        <button class="secondary" onclick="downloadCSV()">📄 Export CSV</button>
+        <button class="secondary" onclick="alert('Exporting PDF...')">📕 Export PDF</button>
+      </div>
+    </div>
+
+    <!-- Container for Machine Cards -->
+    <div id="reportContainer" class="report-grid"></div>
+  </div>
+</div>
+
+<script>
+  // Auth Check
+  const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+  if (!currentUser) {
+    window.location.href = 'login.html';
+  } else {
+    document.getElementById('userDisplay').innerText = `${currentUser.role}: ${currentUser.username}`;
+  }
+
+  function logout() {
+    sessionStorage.removeItem('currentUser');
+    window.location.href = 'login.html';
+  }
+
+  // Theme Logic
+  const style = document.createElement('style');
+  style.innerHTML = `
+    body.light-mode { background: #f0f2f5 !important; color: #333 !important; }
+    body.light-mode .panel { background: #fff !important; border: 1px solid #ccc !important; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    body.light-mode h1, body.light-mode h2, body.light-mode h3 { color: #111 !important; }
+    body.light-mode table { color: #333 !important; }
+    body.light-mode th { border-bottom: 1px solid #ccc !important; }
+    body.light-mode td { border-bottom: 1px solid #eee !important; }
+    body.light-mode nav a { color: #555 !important; }
+    body.light-mode nav a[style*="border-bottom"] { color: #000 !important; }
+    body.light-mode nav span { color: #007bff !important; }
+  `;
+  document.head.appendChild(style);
+
+  if (localStorage.getItem('theme') === 'light') {
+    document.body.classList.add('light-mode');
+  }
+
+  // Global data storage for exports
+  let allMachineData = {};
+
+  // CSV Download Logic
+  function downloadCSV() {
+    const rows = [];
+    // Header
+    rows.push(['Simulated Time', 'Machine ID', 'Risk Level', 'Status']);
+    
+    Object.keys(allMachineData).forEach(mId => {
+      allMachineData[mId].forEach((r, i) => {
+        const hour = i + 1;
+        const timeStr = `${String(hour).padStart(2, '0')}:00:00`;
+        const risk = Math.round(parseFloat(r[2]) * 100) + "%";
+        rows.push([timeStr, mId, risk, r[3]]);
+      });
+    });
+
+    triggerDownload(rows, "full_maintenance_report.csv");
+  }
+
+  function downloadMachineCSV(machineName) {
+    const rows = [];
+    rows.push(['Simulated Time', 'Machine ID', 'Risk Level', 'Status']);
+    
+    const data = allMachineData[machineName] || [];
+    data.forEach((r, i) => {
+      const hour = i + 1;
+      const timeStr = `${String(hour).padStart(2, '0')}:00:00`;
+      const risk = Math.round(parseFloat(r[2]) * 100) + "%";
+      rows.push([timeStr, machineName, risk, r[3]]);
+    });
+
+    triggerDownload(rows, `${machineName}_report.csv`);
+  }
+
+  function triggerDownload(rows, filename) {
+    const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  // Load Logs
+  async function loadReportLogs() {
+    try {
+      // Try fetching from root or relative path
+      const ts = new Date().getTime();
+      let res = await fetch(`/prediction_logs.csv?t=${ts}`);
+      if (!res.ok) res = await fetch(`../prediction_logs.csv?t=${ts}`);
+      if (!res.ok) throw new Error("No logs found");
+      
+      const text = await res.text();
+      const lines = text.trim().split('\n');
+      const rows = lines.slice(1).map(l => l.split(',')).filter(r => r.length >= 3); // Skip header & empty
+      
+      // Group by Machine
+      const machines = {};
+      rows.forEach(r => {
+        const mId = (r[1] || "Unknown").toLowerCase();
+        if (!machines[mId]) machines[mId] = [];
+        machines[mId].push(r);
+      });
+      allMachineData = machines;
+
+      const container = document.getElementById('reportContainer');
+      container.innerHTML = '';
+
+      // Create a Card for each machine
+      Object.keys(machines).forEach(machineName => {
+        const card = document.createElement('div');
+        card.className = 'machine-card';
+        
+        // Card Header
+        let html = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
+            <h3 style="color: #00e5ff; text-transform: capitalize; margin:0;">${machineName} Analysis</h3>
+            <button class="secondary small" onclick="downloadMachineCSV('${machineName}')" style="width:auto; margin:0; font-size:0.8em; padding:5px 10px;">⬇ CSV</button>
+          </div>
+          <table style="width: 100%; border-collapse: collapse; color: #cfeefb; font-size: 0.9em;">
+            <thead>
+              <tr style="text-align: left; color: #88ccff;">
+                <th style="padding: 8px;">Simulated Time</th>
+                <th style="padding: 8px;">Risk</th>
+                <th style="padding: 8px;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        // Add Rows (Show last 10 entries per machine)
+        // We calculate "Hour X" based on the index to satisfy "every 1hr" requirement visually
+        const machineRows = machines[machineName]; // Keep chronological order for hour calculation
+        
+        // Display last 10 rows, but calculate hour based on total index
+        const startIndex = Math.max(0, machineRows.length - 10);
+        const displayRows = machineRows.slice(startIndex);
+
+        displayRows.forEach((r, idx) => {
+          const hour = startIndex + idx + 1; // Hour 1, Hour 2...
+          const timeStr = `${String(hour).padStart(2, '0')}:00:00`;
+          const risk = Math.round(parseFloat(r[2]) * 100);
+          const status = r[3] || "Normal";
+          let color = risk > 75 ? "#ff6b6b" : (risk > 40 ? "#facc15" : "#4ade80");
+
+          html += `
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+              <td style="padding: 8px;">${timeStr}</td>
+              <td style="padding: 8px; font-weight: bold; color: ${color};">${risk}%</td>
+              <td style="padding: 8px;">${status}</td>
+            </tr>`;
+        });
+
+        html += `</tbody></table>`;
+        card.innerHTML = html;
+        container.appendChild(card);
+      });
+    } catch (e) {
+      // Fallback: Show demo data if file fetch fails
+      const container = document.getElementById('reportContainer');
+      container.innerHTML = '<div style="padding:20px; text-align:center; width:100%;">No logs available yet. Start the simulation.</div>';
+      
+    }
+  }
+  loadReportLogs();
+  // Auto-refresh every 3 seconds
+  setInterval(loadReportLogs, 3000);
+</script>
+</body>
+</html>

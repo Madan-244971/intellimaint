@@ -1,0 +1,123 @@
+no<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>IntelliMaint Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+<header>
+  <h1>🛠 IntelliMaint Dashboard</h1>
+  <nav style="margin-top: 10px; display: flex; align-items: center;">
+    <a href="index.html" style="color: #fff; margin: 0 15px; text-decoration: none; font-weight: bold; border-bottom: 2px solid #ff6b6b;">Monitor</a>
+    <a href="reports.html" style="color: #cfeefb; margin: 0 15px; text-decoration: none;">Reports</a>
+    <a href="settings.html" style="color: #cfeefb; margin: 0 15px; text-decoration: none;">Settings</a>
+    <span id="userDisplay" style="margin-left: 20px; color: #00e5ff; font-size: 0.9em; text-transform: capitalize;"></span>
+    <a href="#" onclick="logout()" style="color: #ff6b6b; margin-left: 15px; text-decoration: none; font-size: 0.9em; border: 1px solid #ff6b6b; padding: 4px 10px; border-radius: 4px;">Logout</a>
+  </nav>
+</header>
+
+<div class="container">
+
+  <div class="panel">
+    <h2>Machine</h2>
+    <select id="machine">
+      <option value="motor">Motor</option>
+      <option value="generator">Generator</option>
+      <option value="compressor">Compressor</option>
+      <option value="hydraulic">Hydraulic</option>
+    </select>
+
+    <div style="text-align: center; margin: 15px 0; padding: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+      <div style="font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px; color: #88ccff; margin-bottom: 4px;">Simulated Runtime</div>
+      <span id="runtime" style="font-family: 'Courier New', monospace; font-size: 1.2em; font-weight: bold; color: #fff;">00:00:00</span>
+    </div>
+
+    <div class="status-box">
+      <div id="light" class="light green"></div>
+      <div>
+        <h3>Status: <span id="statusText">NORMAL</span></h3>
+        <h3>Risk: <span id="riskValue">0%</span> <button id="whyBtn" class="secondary small">Why?</button></h3>
+        <h4>Forecast (30m): <span id="forecastValue">0%</span> <small id="confidence" style="color:#9be8ff">(conf 0.00)</small></h4>
+      </div>
+    </div>
+
+    <div class="analysis">
+      <h3>AI Analysis</h3>
+      <p id="analysisText">Waiting for AI signal...</p>
+    </div>
+
+    <div class="sensors">
+      <h4>Sensor Readings</h4>
+      <ul id="sensorList">
+        <li>Temperature: <span id="tempVal">--</span> °C</li>
+        <li>Vibration: <span id="vibVal">--</span> g</li>
+        <li>Current: <span id="curVal">--</span> A</li>
+      </ul>
+    </div>
+
+    <div class="recommendation-box" id="recommendationBox" style="display:none">
+      <h3>Recommendations</h3>
+      <ul id="recommendations"></ul>
+
+      <h3 style="margin-top:12px">Top contributing features</h3>
+      <ul id="featuresList"></ul>
+    </div>
+
+  </div>
+
+  <div class="panel right">
+    <h2>Live Risk Monitoring</h2>
+    <canvas id="riskChart"></canvas>
+
+    <div class="logs" style="margin-top:14px">
+      <h4>Recent Events</h4>
+      <div style="max-height:140px; overflow:auto; margin-top:8px;">
+        <table id="logsTable" style="width:100%; font-size:13px; color:#cfeefb;">
+          <thead><tr><th style="text-align:left">Time</th><th>Risk</th><th>Status</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast / Modal -->
+<div id="toastContainer"></div>
+
+<!-- WHY EXPLANATION MODAL -->
+<div id="whyModal" class="modal" style="display:none">
+  <div class="modal-content">
+    <h3>Why is this risk happening?</h3>
+    <p id="whySummary">Loading explanation...</p>
+    <canvas id="whyChart"></canvas>
+
+    <h4>Sensor snapshot</h4>
+    <ul id="whySensors" style="color:#cfeefb"></ul>
+
+    <h4>Suggested actions</h4>
+    <ul id="whySuggestions" style="color:#fff"></ul>
+
+    <div style="margin-top:12px; text-align:right">
+      <button id="whyClose" class="secondary">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="alertModal" class="modal" style="display:none">
+  <div class="modal-content">
+    <h3 id="modalTitle">Alert</h3>
+    <p id="modalBody"></p>
+    <ul id="modalActions"></ul>
+    <div style="margin-top:12px; text-align:right">
+      <button id="ackBtn" class="secondary">Acknowledge</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<!-- saved from url=(0022)http://127.0.0.1:8001/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <title>IntelliMaint Dashboard</title>
+  <link rel="stylesheet" href="./IntelliMaint Dashboard_files/style.css">
+  <script src="./IntelliMaint Dashboard_files/chart.js.download"></script>
+<script src="./IntelliMaint Dashboard_files/three.min.js.download"></script></head>
+
+<body>
+<header>
+  <h1>🛠 IntelliMaint Dashboard</h1>
+  <span id="runtime">00:01:19</span>
+</header>
+
+<div class="container">
+
+  <div class="panel">
+    <h2>Machine</h2>
+    <select id="machine">
+      <option value="motor">Motor</option>
+      <option value="generator">Generator</option>
+      <option value="compressor">Compressor</option>
+      <option value="hydraulic">Hydraulic</option>
+    </select>
+
+    <div class="status-box">
+      <div id="light" class="light green"></div>
+      <div>
+        <h3>Status: <span id="statusText">NORMAL</span></h3>
+        <h3>Risk: <span id="riskValue">20%</span> <button id="whyBtn" class="secondary small">Why?</button></h3>
+        <h4>Forecast (30m): <span id="forecastValue">28%</span> <small id="confidence" style="color:#9be8ff">(conf 0.62)</small></h4>
+      </div>
+    </div>
+
+    <div class="analysis">
+      <h3>AI Analysis</h3>
+      <p id="analysisText">AI monitoring normal</p>
+    </div>
+
+    <div class="sensors">
+      <h4>Sensor Readings</h4>
+      <ul id="sensorList">
+        <li>Temperature: <span id="tempVal">80.56</span> °C</li>
+        <li>Vibration: <span id="vibVal">0.99</span> g</li>
+        <li>Current: <span id="curVal">10.71</span> A</li>
+      </ul>
+    </div>
+
+    <div class="recommendation-box" id="recommendationBox" style="display: block;">
+      <h3>Recommendations</h3>
+      <ul id="recommendations"><li>Inspect/repair cooling system</li></ul>
+
+      <h3 style="margin-top:12px">Top contributing features</h3>
+      <ul id="featuresList"><li>temperature (+8)</li></ul>
+    </div>
+
+  </div>
+
+  <div class="panel right">
+    <h2>Live Risk Monitoring</h2>
+    <canvas id="riskChart" width="986" height="492" style="display: block; box-sizing: border-box; height: 393.9px; width: 788.8px;"></canvas>
+
+    <div class="logs" style="margin-top:14px">
+      <h4>Recent Events</h4>
+      <div style="max-height:140px; overflow:auto; margin-top:8px;">
+        <table id="logsTable" style="width:100%; font-size:13px; color:#cfeefb;">
+          <thead><tr><th style="text-align:left">Time</th><th>Risk</th><th>Status</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast / Modal -->
+<div id="toastContainer"></div>
+
+<!-- WHY EXPLANATION MODAL -->
+<div id="whyModal" class="modal" style="display:none">
+  <div class="modal-content">
+    <h3>Why is this risk happening?</h3>
+    <p id="whySummary">Loading explanation...</p>
+    <canvas id="whyChart"></canvas>
+
+    <h4>Sensor snapshot</h4>
+    <ul id="whySensors" style="color:#cfeefb"></ul>
+
+    <h4>Suggested actions</h4>
+    <ul id="whySuggestions" style="color:#fff"></ul>
+
+    <div style="margin-top:12px; text-align:right">
+      <button id="whyClose" class="secondary">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="alertModal" class="modal" style="display:none">
+  <div class="modal-content">
+    <h3 id="modalTitle">Alert</h3>
+    <p id="modalBody"></p>
+    <ul id="modalActions"></ul>
+    <div style="margin-top:12px; text-align:right">
+      <button id="ackBtn" class="secondary">Acknowledge</button>
+    </div>
+  </div>
+</div>
+
+<script src="./IntelliMaint Dashboard_files/script.js.download"></script>
+
+
+<span id="PING_CONTENT_MB_MAIN" style="display: none;"></span></body></html>

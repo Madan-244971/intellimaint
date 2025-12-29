@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>IntelliMaint - Settings</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header>
+  <h1>🛠 IntelliMaint Settings</h1>
+  <nav style="margin-top: 10px; display: flex; align-items: center;">
+    <a href="index.html" style="color: #cfeefb; margin: 0 15px; text-decoration: none;">Monitor</a>
+    <a href="reports.html" style="color: #cfeefb; margin: 0 15px; text-decoration: none;">Reports</a>
+    <a href="settings.html" style="color: #fff; margin: 0 15px; text-decoration: none; font-weight: bold; border-bottom: 2px solid #ff6b6b;">Settings</a>
+    <span id="userDisplay" style="margin-left: 20px; color: #00e5ff; font-size: 0.9em; text-transform: capitalize;"></span>
+    <a href="#" onclick="logout()" style="color: #ff6b6b; margin-left: 15px; text-decoration: none; font-size: 0.9em; border: 1px solid #ff6b6b; padding: 4px 10px; border-radius: 4px;">Logout</a>
+  </nav>
+</header>
+
+<div class="container">
+  <div class="panel" style="max-width: 600px; margin: 0 auto;">
+    <h2 style="text-align:center; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">Configuration</h2>
+    
+    <!-- Account Details (Grid Layout) -->
+    <div style="margin-bottom: 25px;">
+      <h3 style="font-size: 1.1em; color: #cfeefb; margin-bottom: 15px;">👤 Account Details</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+          <label style="display:block; margin-bottom:5px; color:#88ccff; font-size: 0.9em;">Username</label>
+          <input type="text" id="accUsername" readonly style="width:100%; padding:10px; background:rgba(0,0,0,0.2); color:#aaa; border:1px solid #444; border-radius:4px; cursor: not-allowed;">
+        </div>
+        <div>
+          <label style="display:block; margin-bottom:5px; color:#88ccff; font-size: 0.9em;">Role</label>
+          <input type="text" id="accRole" readonly style="width:100%; padding:10px; background:rgba(0,0,0,0.2); color:#aaa; border:1px solid #444; border-radius:4px; cursor: not-allowed;">
+        </div>
+      </div>
+    </div>
+
+    <!-- Appearance -->
+    <div style="margin-bottom: 25px;">
+      <h3 style="font-size: 1.1em; color: #cfeefb; margin-bottom: 15px;">🎨 Appearance</h3>
+      <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 6px;">
+        <label style="color:#fff; font-weight: bold;">Interface Theme</label>
+        <select id="themeSelect" onchange="toggleTheme()" style="padding:8px 12px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid #444; border-radius:4px; cursor: pointer;">
+          <option value="dark">Dark Mode</option>
+          <option value="light">Light Mode</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Contact Information -->
+    <div style="margin-bottom: 25px;">
+      <h3 style="font-size: 1.1em; color: #cfeefb; margin-bottom: 15px;">📧 Contact Information</h3>
+      <div>
+        <label style="display:block; margin-bottom:5px; color:#88ccff; font-size: 0.9em;">Email Address</label>
+        <input type="email" id="contactEmail" placeholder="user@example.com" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid #444; border-radius:4px;">
+      </div>
+    </div>
+
+    <!-- Security -->
+    <div style="margin-bottom: 30px;">
+      <h3 style="font-size: 1.1em; color: #cfeefb; margin-bottom: 15px;">🔒 Security</h3>
+      <div>
+        <label style="display:block; margin-bottom:5px; color:#88ccff; font-size: 0.9em;">Change Password</label>
+        <input type="password" id="newPassword" placeholder="Enter new password" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid #444; border-radius:4px;">
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div style="display: flex; gap: 15px; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+      <button onclick="saveSettings()" style="flex: 2; padding:12px; background:#4ade80; color:#000; border:none; border-radius:4px; cursor:pointer; font-weight:bold; font-size: 1em;">Save Changes</button>
+      <button onclick="logout()" style="flex: 1; padding:12px; background:transparent; color:#ff6b6b; border:1px solid #ff6b6b; border-radius:4px; cursor:pointer; font-weight:bold; font-size: 1em;">Log Out</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Auth Check
+  const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
+  if (!currentUser) {
+    window.location.href = 'login.html';
+  } else {
+    document.getElementById('userDisplay').innerText = `${currentUser.role}: ${currentUser.username}`;
+    document.getElementById('accUsername').value = currentUser.username;
+    document.getElementById('accRole').value = currentUser.role;
+    document.getElementById('contactEmail').value = currentUser.email || "";
+  }
+
+  function logout() {
+    sessionStorage.removeItem('currentUser');
+    window.location.href = 'login.html';
+  }
+
+  // Theme Logic (Missing in previous version)
+  const style = document.createElement('style');
+  style.innerHTML = `
+    body.light-mode { background: #f0f2f5 !important; color: #333 !important; }
+    body.light-mode .panel { background: #fff !important; border: 1px solid #ccc !important; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    body.light-mode h1, body.light-mode h2, body.light-mode h3 { color: #111 !important; }
+    body.light-mode label { color: #555 !important; }
+    body.light-mode input, body.light-mode select { background: #fff !important; color: #333 !important; border: 1px solid #ccc !important; }
+    body.light-mode nav a { color: #555 !important; }
+    body.light-mode nav a[style*="border-bottom"] { color: #000 !important; }
+    body.light-mode nav span { color: #007bff !important; }
+  `;
+  document.head.appendChild(style);
+
+  function applyTheme() {
+    const theme = localStorage.getItem('theme') || 'dark';
+    document.getElementById('themeSelect').value = theme;
+    if (theme === 'light') {
+      document.body.classList.add('light-mode');
+    } else {
+      document.body.classList.remove('light-mode');
+    }
+  }
+
+  function toggleTheme() {
+    const val = document.getElementById('themeSelect').value;
+    localStorage.setItem('theme', val);
+    applyTheme();
+  }
+
+  // Apply on load
+  applyTheme();
+
+  function saveSettings() {
+    // Save Email & Password
+    const email = document.getElementById('contactEmail').value;
+    const newPass = document.getElementById('newPassword').value;
+    
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    const userIdx = users.findIndex(u => u.username === currentUser.username);
+    
+    if (userIdx !== -1) {
+      if (email) users[userIdx].email = email;
+      if (newPass) users[userIdx].password = newPass;
+      localStorage.setItem('users', JSON.stringify(users));
+      
+      // Update current session
+      currentUser.email = email;
+      sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+    }
+
+    // UI Feedback
+    const btn = document.querySelector('button');
+    const originalText = btn.innerText;
+    btn.innerText = "✅ Saved!";
+    btn.style.background = "#4ade80";
+    btn.style.color = "#000";
+    
+    setTimeout(() => {
+      btn.innerText = originalText;
+      btn.style.background = "#ff6b6b";
+      btn.style.color = "white";
+    }, 2000);
+  }
+</script>
+</body>
+</html>
