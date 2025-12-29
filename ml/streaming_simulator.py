@@ -114,7 +114,7 @@ def stream():
             payload['machine_id'] = m_id
 
             try:
-                response = requests.post(API_URL, json=payload)
+                response = requests.post(api_url, json=payload)
 
                 if response.status_code != 200:
                     print(f"❌ API ERROR ({m_id}):", response.text)
