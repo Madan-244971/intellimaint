@@ -93,7 +93,7 @@ def stream():
         # CHANGED: No auto-repair. Machine stays broken to show persistent risk.
         # We only reset if the runtime gets very high (simulating a new demo run).
         if runtime_hours > 15.0:
-            print("\n🛑 CRITICAL FAILURE PERSISTED. RESTARTING DEMO SCENARIO...\n")
+            print("\n Simulation loop finished. Restarting scenario...\n")
             runtime_hours = 0.0
             machine_states = {m: {'wear': 0.0, 'data': None} for m in machines}
             time.sleep(2)
