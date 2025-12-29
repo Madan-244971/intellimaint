@@ -6,7 +6,6 @@ import os
 from datetime import datetime
 
 # Read API URL from environment variable, default to localhost:8000 for local dev
-API_URL = os.getenv("API_URL", "http://127.0.0.1:8000/predict")
 LOG_FILE = os.path.join("dashboard", "prediction_logs.csv")
 
 def generate_sensor_data(wear_level=0.0, previous_data=None):
@@ -54,8 +53,9 @@ def generate_sensor_data(wear_level=0.0, previous_data=None):
     }
 
 def stream():
-    print("🔄 Live sensor stream started...\n")
-    
+    # Fetch API_URL here to ensure we get the updated env var from render_app.py
+    api_url = os.getenv("API_URL", "http://127.0.0.1:8000/predict")
+    print(f"🔄 Live sensor stream started targeting: {api_url}\n")
     # Simulation state
     runtime_hours = 0.0
     time_increment = 1.0 # Each step adds 1.0 hours (Report saves every 1hr)
